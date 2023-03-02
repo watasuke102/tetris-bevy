@@ -192,13 +192,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "bevy-codespaces"
-version = "0.1.0"
-dependencies = [
- "bevy",
-]
-
-[[package]]
 name = "bevy_animation"
 version = "0.9.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -2714,6 +2707,13 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "be55cf8942feac5c765c2c993422806843c9a9a45d4d5c407ad6dd2ea95eb9b6"
 dependencies = [
  "winapi-util",
+]
+
+[[package]]
+name = "tetris"
+version = "0.1.0"
+dependencies = [
+ "bevy",
 ]
 
 [[package]]
