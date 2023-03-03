@@ -2,6 +2,6 @@ web:
 	cargo run --target "wasm32-unknown-unknown"
 
 r:
-	cargo run
+	cargo run --target "x86_64-unknown-linux-gnu"
 b:
-	cargo build
+	cargo build --target "x86_64-unknown-linux-gnu"
