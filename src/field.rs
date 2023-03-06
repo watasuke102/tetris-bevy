@@ -3,6 +3,8 @@ use bevy::prelude::*;
 pub const BLOCK_SIZE: f32 = 32.0;
 const FIELD_X: f32 = -200.0;
 const FIELD_Y: f32 = 400.0;
+const FIELD_ROW: i32 = 20 + 5;
+const FIELD_COLUMN: i32 = 10;
 
 #[derive(Component, Default)]
 pub struct Field {
@@ -16,8 +18,8 @@ pub fn init(app: &mut App) {
 }
 
 fn startup(mut commands: Commands) {
-  for i in 0..10 {
-    for j in 0..20 + 5 {
+  for i in 0..FIELD_COLUMN {
+    for j in 0..FIELD_ROW {
       let visible = j >= 5;
       commands.spawn((
         SpriteBundle {
@@ -43,7 +45,7 @@ fn startup(mut commands: Commands) {
   }
 }
 
-pub fn set_block(query: &mut Query<(&mut Sprite, &mut Field)>, pos: IVec2, color: Color) {
+pub fn set_block(query: &mut Query<(&mut Sprite, &mut Field)>, pos: IVec2, color: Color) -> bool {
   for (mut sprite, mut field) in query {
     if field.pos != pos {
       continue;
@@ -55,6 +57,11 @@ pub fn set_block(query: &mut Query<(&mut Sprite, &mut Field)>, pos: IVec2, color
     sprite.color = color;
     break;
   }
+
+  if pos.y == FIELD_ROW - 1 {
+    return true;
+  }
+  return false;
 }
 
 pub fn unset_block(query: &mut Query<(&mut Sprite, &mut Field)>, pos: IVec2) {

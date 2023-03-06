@@ -6,8 +6,8 @@ mod field;
 fn main() {
   let mut app = App::new();
   app.add_plugins(DefaultPlugins).add_startup_system(setup);
-  block::init(&mut app);
   field::init(&mut app);
+  block::init(&mut app);
   app.run();
 }
 

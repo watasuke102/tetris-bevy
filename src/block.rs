@@ -34,12 +34,14 @@ fn move_block(
   for mut block in &mut query {
     field::unset_block(&mut field_query, block.pos);
     block.pos.y += 1;
-    field::set_block(&mut field_query, block.pos, Color::hex("98c379").unwrap());
+    if field::set_block(&mut field_query, block.pos, Color::hex("98c379").unwrap()) {
+      block.pos.y = 4;
+    }
   }
 }
 
 fn startup(mut commands: Commands) {
   commands.spawn(Block {
-    pos: IVec2::new(5, 0),
+    pos: IVec2::new(5, 4),
   });
 }
