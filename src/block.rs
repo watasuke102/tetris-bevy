@@ -63,7 +63,7 @@ fn move_mino(
     return;
   }
 
-  let mut mino = query.iter_mut().next().unwrap();
+  let mut mino = query.single_mut();
   if mino.pos.y == field::FIELD_ROW - 1 {
     let mino_type = mino.mino_type;
     mino.set_type((mino_type + 1) % MINO_TYPES.len(), &mut field_query);
