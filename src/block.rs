@@ -62,23 +62,22 @@ fn move_mino(
     return;
   }
 
-  for mut mino in &mut query {
-    if mino.pos.y == field::FIELD_ROW - 1 {
-      let mino_type = mino.mino_type;
-      mino.set_type((mino_type + 1) % MINO_TYPES.len(), &mut field_query);
-      continue;
-    }
-    for e in MINO_TYPES[mino.mino_type] {
-      field::unset_block(&mut field_query, mino.pos + e);
-    }
-    mino.pos.y += 1;
-    for e in MINO_TYPES[mino.mino_type] {
-      field::set_block(
-        &mut field_query,
-        mino.pos + e,
-        Color::hex("98c379").unwrap(),
-      );
-    }
+  let mut mino = query.iter_mut().next().unwrap();
+  if mino.pos.y == field::FIELD_ROW - 1 {
+    let mino_type = mino.mino_type;
+    mino.set_type((mino_type + 1) % MINO_TYPES.len(), &mut field_query);
+    return;
+  }
+  for e in MINO_TYPES[mino.mino_type] {
+    field::unset_block(&mut field_query, mino.pos + e);
+  }
+  mino.pos.y += 1;
+  for e in MINO_TYPES[mino.mino_type] {
+    field::set_block(
+      &mut field_query,
+      mino.pos + e,
+      Color::hex("98c379").unwrap(),
+    );
   }
 }
 
