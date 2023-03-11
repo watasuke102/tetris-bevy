@@ -4,6 +4,7 @@ use crate::field;
 
 // 1(-1, -1)  3(0, -1)  5(1, -1)
 // 2(-1,  0)  4(0,  0)  6(1,  0)
+#[rustfmt::skip]
 const MINO_TYPES: [[IVec2; 4]; 7] = [
   [IVec2{x: -1, y:  0}, IVec2{x:  0, y:  0}, IVec2{x: 1, y:  0}, IVec2{x: 2, y:  0}], // I
   [IVec2{x: -1, y: -1}, IVec2{x: -1, y:  0}, IVec2{x: 0, y:  0}, IVec2{x: 1, y:  0}], // J
