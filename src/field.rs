@@ -1,9 +1,9 @@
 use bevy::prelude::*;
 
-pub const BLOCK_SIZE: f32 = 32.0;
+const BLOCK_SIZE: f32 = 24.0;
 const FIELD_X: f32 = -200.0;
 const FIELD_Y: f32 = 400.0;
-const FIELD_ROW: i32 = 20 + 5;
+pub const FIELD_ROW: i32 = 20 + 5;
 const FIELD_COLUMN: i32 = 10;
 
 #[derive(Component, Default)]
