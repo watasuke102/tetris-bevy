@@ -1,6 +1,6 @@
 use bevy::prelude::*;
 
-use crate::block;
+use crate::mino;
 
 const BLOCK_SIZE: f32 = 24.0;
 const FIELD_X: f32 = -200.0;
@@ -109,11 +109,11 @@ fn startup(mut commands: Commands) {
 
 fn startup_mino_after_field_init(
   commands: Commands,
-  query: Query<&block::Mino>,
+  query: Query<&mino::Mino>,
   field: ResMut<Field>,
   field_block_query: Query<(&mut Sprite, &mut FieldBlock)>,
 ) {
   if let Err(_) = query.get_single() {
-    block::startup_mino(commands, field, field_block_query);
+    mino::startup_mino(commands, field, field_block_query);
   }
 }
