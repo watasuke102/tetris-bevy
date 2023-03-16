@@ -113,7 +113,7 @@ pub fn init(app: &mut App) {
   app.add_system(move_mino);
 
   app.insert_resource(MinoDropTimer(Timer::new(
-    std::time::Duration::from_millis(500),
+    std::time::Duration::from_millis(300),
     TimerMode::Repeating,
   )));
 }
@@ -131,18 +131,31 @@ fn move_mino(
   }
 
   let mut mino = query.single_mut();
-  if !field.is_movable_pos(&mino.pos) {
-    let mino_type = mino.mino_type;
-    mino.set_type(
-      (mino_type + 1) % MINO_TYPES.len(),
-      field,
-      &mut field_block_query,
-    );
-    return;
-  }
   for e in MINO_TYPES[mino.mino_type].blocks {
     field.unset_block(&mut field_block_query, mino.pos + e);
   }
+
+  for e in MINO_TYPES[mino.mino_type].blocks {
+    let mut pos = mino.pos + e;
+    pos.y += 1;
+    if !field.is_movable_pos(&pos) {
+      for e in MINO_TYPES[mino.mino_type].blocks {
+        field.set_block(
+          &mut field_block_query,
+          mino.pos + e,
+          Color::hex(MINO_TYPES[mino.mino_type].color).unwrap(),
+        );
+      }
+      let mino_type = mino.mino_type;
+      mino.set_type(
+        (mino_type + 1) % MINO_TYPES.len(),
+        field,
+        &mut field_block_query,
+      );
+      return;
+    }
+  }
+
   mino.pos.y += 1;
   for e in MINO_TYPES[mino.mino_type].blocks {
     field.set_block(
