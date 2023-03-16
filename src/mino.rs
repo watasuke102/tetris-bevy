@@ -107,15 +107,14 @@ impl Mino {
 }
 
 #[derive(Resource, Default)]
-struct MinoDropTimer(Timer);
+pub struct MinoDropTimer(pub Timer);
 
 pub fn init(app: &mut App) {
   app.add_system(move_mino);
 
-  app.insert_resource(MinoDropTimer(Timer::new(
-    std::time::Duration::from_millis(300),
-    TimerMode::Repeating,
-  )));
+  let mut timer = Timer::new(std::time::Duration::from_millis(300), TimerMode::Repeating);
+  timer.pause();
+  app.insert_resource(MinoDropTimer(timer));
 }
 
 fn move_mino(
@@ -170,8 +169,12 @@ pub fn startup_mino(
   mut commands: Commands,
   field: ResMut<field::Field>,
   mut field_block_query: Query<(&mut Sprite, &mut field::FieldBlock)>,
+  mut timer: ResMut<MinoDropTimer>,
 ) {
   let mut mino = Mino::default();
   mino.set_type(0, field, &mut field_block_query);
   commands.spawn(mino);
+
+  timer.0.reset();
+  timer.0.unpause();
 }
