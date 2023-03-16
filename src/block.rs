@@ -2,17 +2,83 @@ use bevy::prelude::*;
 
 use crate::field;
 
-// 1(-1, -1)  3(0, -1)  5(1, -1)
-// 2(-1,  0)  4(0,  0)  6(1,  0)
-#[rustfmt::skip]
-const MINO_TYPES: [[IVec2; 4]; 7] = [
-  [IVec2{x: -1, y:  0}, IVec2{x:  0, y:  0}, IVec2{x: 1, y:  0}, IVec2{x: 2, y:  0}], // I
-  [IVec2{x: -1, y: -1}, IVec2{x: -1, y:  0}, IVec2{x: 0, y:  0}, IVec2{x: 1, y:  0}], // J
-  [IVec2{x: -1, y:  0}, IVec2{x:  0, y:  0}, IVec2{x: 1, y:  0}, IVec2{x: 1, y: -1}], // L
-  [IVec2{x: -1, y:  0}, IVec2{x:  0, y: -1}, IVec2{x: 0, y:  0}, IVec2{x: 1, y: -1}], // S
-  [IVec2{x: -1, y: -1}, IVec2{x:  0, y: -1}, IVec2{x: 0, y:  0}, IVec2{x: 1, y:  0}], // Z
-  [IVec2{x:  0, y: -1}, IVec2{x:  0, y:  0}, IVec2{x: 1, y: -1}, IVec2{x: 1, y:  0}], // O
-  [IVec2{x: -1, y: 0},  IVec2{x:  0, y: -1}, IVec2{x: 0, y:  0}, IVec2{x: 1, y:  0}], // T
+struct MinoType {
+  // 1(-1, -1)  3(0, -1)  5(1, -1)
+  // 2(-1,  0)  4(0,  0)  6(1,  0)
+  blocks: [IVec2; 4],
+  color:  &'static str,
+}
+const MINO_TYPES: [MinoType; 7] = [
+  // I
+  MinoType {
+    blocks: [
+      IVec2 { x: -1, y: 0 },
+      IVec2 { x: 0, y: 0 },
+      IVec2 { x: 1, y: 0 },
+      IVec2 { x: 2, y: 0 },
+    ],
+    color:  "56b6c2",
+  },
+  // J
+  MinoType {
+    blocks: [
+      IVec2 { x: -1, y: -1 },
+      IVec2 { x: -1, y: 0 },
+      IVec2 { x: 0, y: 0 },
+      IVec2 { x: 1, y: 0 },
+    ],
+    color:  "61afef",
+  },
+  // L
+  MinoType {
+    blocks: [
+      IVec2 { x: -1, y: 0 },
+      IVec2 { x: 0, y: 0 },
+      IVec2 { x: 1, y: 0 },
+      IVec2 { x: 1, y: -1 },
+    ],
+    color:  "d69363",
+  },
+  // S
+  MinoType {
+    blocks: [
+      IVec2 { x: -1, y: 0 },
+      IVec2 { x: 0, y: -1 },
+      IVec2 { x: 0, y: 0 },
+      IVec2 { x: 1, y: -1 },
+    ],
+    color:  "98c379",
+  },
+  // Z
+  MinoType {
+    blocks: [
+      IVec2 { x: -1, y: -1 },
+      IVec2 { x: 0, y: -1 },
+      IVec2 { x: 0, y: 0 },
+      IVec2 { x: 1, y: 0 },
+    ],
+    color:  "e06c75",
+  },
+  // O
+  MinoType {
+    blocks: [
+      IVec2 { x: 0, y: -1 },
+      IVec2 { x: 0, y: 0 },
+      IVec2 { x: 1, y: -1 },
+      IVec2 { x: 1, y: 0 },
+    ],
+    color:  "e5c07b",
+  },
+  // T
+  MinoType {
+    blocks: [
+      IVec2 { x: -1, y: 0 },
+      IVec2 { x: 0, y: -1 },
+      IVec2 { x: 0, y: 0 },
+      IVec2 { x: 1, y: 0 },
+    ],
+    color:  "c678dd",
+  },
 ];
 
 #[derive(Component, Default)]
@@ -30,11 +96,11 @@ impl Mino {
   ) {
     self.pos = IVec2::new(5, 5);
     self.mino_type = mino_type;
-    for e in MINO_TYPES[self.mino_type] {
+    for e in MINO_TYPES[self.mino_type].blocks {
       field.set_block(
         &mut field_block_query,
         self.pos + e,
-        Color::hex("98c379").unwrap(),
+        Color::hex(MINO_TYPES[self.mino_type].color).unwrap(),
       );
     }
   }
@@ -74,15 +140,15 @@ fn move_mino(
     );
     return;
   }
-  for e in MINO_TYPES[mino.mino_type] {
+  for e in MINO_TYPES[mino.mino_type].blocks {
     field.unset_block(&mut field_block_query, mino.pos + e);
   }
   mino.pos.y += 1;
-  for e in MINO_TYPES[mino.mino_type] {
+  for e in MINO_TYPES[mino.mino_type].blocks {
     field.set_block(
       &mut field_block_query,
       mino.pos + e,
-      Color::hex("98c379").unwrap(),
+      Color::hex(MINO_TYPES[mino.mino_type].color).unwrap(),
     );
   }
 }
