@@ -1,10 +1,13 @@
 use bevy::prelude::*;
 
-const BLOCK_SIZE: f32 = 24.0;
-const FIELD_X: f32 = -200.0;
-const FIELD_Y: f32 = 400.0;
-pub const FIELD_ROW: i32 = 20 + 5;
-const FIELD_COLUMN: i32 = 10;
+pub const BLOCK_SIZE: f32 = 24.0;
+
+pub const FIELD_ROW_HIDDEN: i32 = 4;
+pub const FIELD_ROW: i32 = 20 + FIELD_ROW_HIDDEN;
+pub const FIELD_COLUMN: i32 = 10;
+
+pub const FIELD_X: f32 = -(BLOCK_SIZE * FIELD_COLUMN as f32) / 2.;
+pub const FIELD_Y: f32 = (BLOCK_SIZE * FIELD_ROW as f32) / 2. - 60.;
 
 #[derive(Component, Default)]
 pub struct FieldBlock {
@@ -79,7 +82,7 @@ fn startup(mut commands: Commands) {
 
   for i in 0..FIELD_COLUMN {
     for j in 0..FIELD_ROW {
-      let visible = j >= 5;
+      let visible = j >= FIELD_ROW_HIDDEN;
       commands.spawn((
         SpriteBundle {
           sprite: Sprite {
@@ -88,8 +91,8 @@ fn startup(mut commands: Commands) {
             ..default()
           },
           transform: Transform::from_xyz(
-            FIELD_X + i as f32 * BLOCK_SIZE,
-            FIELD_Y - j as f32 * BLOCK_SIZE,
+            (BLOCK_SIZE / 2.) + (FIELD_X + i as f32 * BLOCK_SIZE),
+            (BLOCK_SIZE / 2.) + (FIELD_Y - (j - FIELD_ROW_HIDDEN + 1) as f32 * BLOCK_SIZE),
             0.0,
           ),
           ..default()

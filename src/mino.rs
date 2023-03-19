@@ -94,7 +94,7 @@ impl Mino {
     mut field: ResMut<field::Field>,
     mut field_block_query: &mut Query<(&mut Sprite, &mut field::FieldBlock)>,
   ) {
-    self.pos = IVec2::new(5, 5);
+    self.pos = IVec2::new(5, field::FIELD_ROW_HIDDEN);
     self.mino_type = mino_type;
     for e in MINO_TYPES[self.mino_type].blocks {
       field.set_block(
