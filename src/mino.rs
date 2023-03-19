@@ -93,6 +93,7 @@ impl Mino {
     mino_type: usize,
     mut field: ResMut<field::Field>,
     mut field_block_query: &mut Query<(&mut Sprite, &mut field::FieldBlock)>,
+    timer: &mut ResMut<MinoDropTimer>,
   ) {
     self.pos = IVec2::new(5, field::FIELD_ROW_HIDDEN);
     self.mino_type = mino_type;
@@ -103,6 +104,7 @@ impl Mino {
         Color::hex(MINO_TYPES[self.mino_type].color).unwrap(),
       );
     }
+    timer.0.reset();
   }
 
   fn move_mino(
@@ -173,6 +175,7 @@ fn drop_mino(
       (mino_type + 1) % MINO_TYPES.len(),
       field,
       &mut field_block_query,
+      &mut timer,
     );
   }
 }
@@ -182,12 +185,27 @@ fn move_mino(
   mut query: Query<&mut Mino>,
   mut field: ResMut<field::Field>,
   mut field_block_query: Query<(&mut Sprite, &mut field::FieldBlock)>,
+  mut timer: ResMut<MinoDropTimer>,
 ) {
   let Ok(mut mino) = query.get_single_mut() else {return;};
   if key_input.just_pressed(KeyCode::Left) {
     let _ = mino.move_mino(IVec2::new(-1, 0), &mut field, &mut field_block_query);
   } else if key_input.just_pressed(KeyCode::Right) {
     let _ = mino.move_mino(IVec2::new(1, 0), &mut field, &mut field_block_query);
+  }
+  if key_input.just_pressed(KeyCode::Up) {
+    loop {
+      if let Err(_) = mino.move_mino(IVec2::new(0, 1), &mut field, &mut field_block_query) {
+        let mino_type = mino.mino_type;
+        mino.set_type(
+          (mino_type + 1) % MINO_TYPES.len(),
+          field,
+          &mut field_block_query,
+          &mut timer,
+        );
+        break;
+      }
+    }
   }
 }
 
@@ -198,7 +216,7 @@ pub fn startup_mino(
   mut timer: ResMut<MinoDropTimer>,
 ) {
   let mut mino = Mino::default();
-  mino.set_type(0, field, &mut field_block_query);
+  mino.set_type(0, field, &mut field_block_query, &mut timer);
   commands.spawn(mino);
 
   timer.0.reset();
