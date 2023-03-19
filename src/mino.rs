@@ -147,6 +147,7 @@ pub struct MinoDropTimer(pub Timer);
 
 pub fn init(app: &mut App) {
   app.add_system(drop_mino);
+  app.add_system(move_mino);
 
   let mut timer = Timer::new(std::time::Duration::from_millis(300), TimerMode::Repeating);
   timer.pause();
@@ -173,6 +174,20 @@ fn drop_mino(
       field,
       &mut field_block_query,
     );
+  }
+}
+
+fn move_mino(
+  key_input: Res<Input<KeyCode>>,
+  mut query: Query<&mut Mino>,
+  mut field: ResMut<field::Field>,
+  mut field_block_query: Query<(&mut Sprite, &mut field::FieldBlock)>,
+) {
+  let Ok(mut mino) = query.get_single_mut() else {return;};
+  if key_input.just_pressed(KeyCode::Left) {
+    let _ = mino.move_mino(IVec2::new(-1, 0), &mut field, &mut field_block_query);
+  } else if key_input.just_pressed(KeyCode::Right) {
+    let _ = mino.move_mino(IVec2::new(1, 0), &mut field, &mut field_block_query);
   }
 }
 

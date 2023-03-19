@@ -23,7 +23,10 @@ pub struct Field {
 
 impl Field {
   pub fn is_movable_pos(&self, pos: &IVec2) -> bool {
-    if pos.y == FIELD_ROW {
+    if pos.x < 0 || pos.x >= FIELD_COLUMN {
+      return false;
+    }
+    if pos.y >= FIELD_ROW {
       return false;
     }
     if self.blocks[pos.x as usize][pos.y as usize] {
