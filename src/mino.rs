@@ -104,20 +104,56 @@ impl Mino {
       );
     }
   }
+
+  fn move_mino(
+    &mut self,
+    diff: IVec2,
+    field: &mut ResMut<field::Field>,
+    mut field_block_query: &mut Query<(&mut Sprite, &mut field::FieldBlock)>,
+  ) -> Result<(), ()> {
+    for e in MINO_TYPES[self.mino_type].blocks {
+      field.unset_block(field_block_query, self.pos + e);
+    }
+
+    for e in MINO_TYPES[self.mino_type].blocks {
+      let pos = self.pos + e + diff;
+      if !field.is_movable_pos(&pos) {
+        for e in MINO_TYPES[self.mino_type].blocks {
+          field.set_block(
+            field_block_query,
+            self.pos + e,
+            Color::hex(MINO_TYPES[self.mino_type].color).unwrap(),
+          );
+        }
+        return Err(());
+      }
+    }
+
+    self.pos += diff;
+    for e in MINO_TYPES[self.mino_type].blocks {
+      field.set_block(
+        &mut field_block_query,
+        self.pos + e,
+        Color::hex(MINO_TYPES[self.mino_type].color).unwrap(),
+      );
+    }
+
+    Ok(())
+  }
 }
 
 #[derive(Resource, Default)]
 pub struct MinoDropTimer(pub Timer);
 
 pub fn init(app: &mut App) {
-  app.add_system(move_mino);
+  app.add_system(drop_mino);
 
   let mut timer = Timer::new(std::time::Duration::from_millis(300), TimerMode::Repeating);
   timer.pause();
   app.insert_resource(MinoDropTimer(timer));
 }
 
-fn move_mino(
+fn drop_mino(
   mut query: Query<&mut Mino>,
   mut field: ResMut<field::Field>,
   mut field_block_query: Query<(&mut Sprite, &mut field::FieldBlock)>,
@@ -129,38 +165,13 @@ fn move_mino(
     return;
   }
 
-  let mut mino = query.single_mut();
-  for e in MINO_TYPES[mino.mino_type].blocks {
-    field.unset_block(&mut field_block_query, mino.pos + e);
-  }
-
-  for e in MINO_TYPES[mino.mino_type].blocks {
-    let mut pos = mino.pos + e;
-    pos.y += 1;
-    if !field.is_movable_pos(&pos) {
-      for e in MINO_TYPES[mino.mino_type].blocks {
-        field.set_block(
-          &mut field_block_query,
-          mino.pos + e,
-          Color::hex(MINO_TYPES[mino.mino_type].color).unwrap(),
-        );
-      }
-      let mino_type = mino.mino_type;
-      mino.set_type(
-        (mino_type + 1) % MINO_TYPES.len(),
-        field,
-        &mut field_block_query,
-      );
-      return;
-    }
-  }
-
-  mino.pos.y += 1;
-  for e in MINO_TYPES[mino.mino_type].blocks {
-    field.set_block(
+  let Ok(mut mino) = query.get_single_mut() else {return;};
+  if let Err(_) = mino.move_mino(IVec2::new(0, 1), &mut field, &mut field_block_query) {
+    let mino_type = mino.mino_type;
+    mino.set_type(
+      (mino_type + 1) % MINO_TYPES.len(),
+      field,
       &mut field_block_query,
-      mino.pos + e,
-      Color::hex(MINO_TYPES[mino.mino_type].color).unwrap(),
     );
   }
 }
