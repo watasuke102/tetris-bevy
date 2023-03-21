@@ -144,7 +144,6 @@ fn drop_mino(
   let Ok(mut mino) = query.get_single_mut() else {return;};
   if let Err(_) = mino.move_mino(IVec2::new(0, 1), &mut field, &mut field_block_query) {
     field.delete_filled_line(&mut field_block_query);
-    let mino_type = mino.mino_type;
     mino.set_type(next_mino, field, &mut field_block_query, &mut timer);
   }
 }
@@ -166,7 +165,6 @@ fn move_mino(
   if key_input.just_pressed(KeyCode::Up) {
     loop {
       if let Err(_) = mino.move_mino(IVec2::new(0, 1), &mut field, &mut field_block_query) {
-        let mino_type = mino.mino_type;
         mino.set_type(next_mino, field, &mut field_block_query, &mut timer);
         break;
       }
