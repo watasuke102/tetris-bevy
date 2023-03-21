@@ -11,9 +11,8 @@ pub const FIELD_Y: f32 = (BLOCK_SIZE * FIELD_ROW as f32) / 2. - 60.;
 
 #[derive(Component, Default)]
 pub struct FieldBlock {
-  pos:       IVec2,
-  has_block: bool,
-  visible:   bool,
+  pos:     IVec2,
+  visible: bool,
 }
 
 #[derive(Resource, Default, Clone, Copy)]
@@ -42,14 +41,13 @@ impl Field {
     color: Color,
   ) -> bool {
     self.blocks[pos.x as usize][pos.y as usize] = true;
-    for (mut sprite, mut field) in query {
-      if field.pos != pos {
+    for (mut sprite, field_block) in query {
+      if field_block.pos != pos {
         continue;
       }
-      if !field.visible {
+      if !field_block.visible {
         break;
       }
-      field.has_block = true;
       sprite.color = color;
       break;
     }
@@ -62,14 +60,13 @@ impl Field {
 
   pub fn unset_block(&mut self, query: &mut Query<(&mut Sprite, &mut FieldBlock)>, pos: IVec2) {
     self.blocks[pos.x as usize][pos.y as usize] = false;
-    for (mut sprite, mut field) in query {
-      if field.pos != pos {
+    for (mut sprite, field_block) in query {
+      if field_block.pos != pos {
         continue;
       }
-      if !field.visible {
+      if !field_block.visible {
         break;
       }
-      field.has_block = false;
       sprite.color = Color::hex("282c34").unwrap();
       break;
     }
@@ -101,9 +98,8 @@ fn startup(mut commands: Commands) {
           ..default()
         },
         FieldBlock {
-          pos:       IVec2 { x: i, y: j },
-          has_block: false,
-          visible:   visible,
+          pos:     IVec2 { x: i, y: j },
+          visible: visible,
         },
       ));
     }
