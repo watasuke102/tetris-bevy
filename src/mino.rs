@@ -97,6 +97,7 @@ impl Mino {
     mut field_block_query: &mut Query<(&mut Sprite, &mut field::FieldBlock)>,
     timer: &mut ResMut<MinoDropTimer>,
   ) {
+    field.delete_filled_line(&mut field_block_query);
     self.pos = IVec2::new(5, field::FIELD_ROW_HIDDEN);
     self.mino_type = mino_type;
     self.blocks = MINO_TYPES[self.mino_type].blocks.clone();
@@ -214,6 +215,7 @@ fn drop_mino(
 
   let Ok(mut mino) = query.get_single_mut() else {return;};
   if let Err(_) = mino.move_mino(IVec2::new(0, 1), &mut field, &mut field_block_query) {
+    field.delete_filled_line(&mut field_block_query);
     let mino_type = mino.mino_type;
     mino.set_type(
       (mino_type + 1) % MINO_TYPES.len(),

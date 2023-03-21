@@ -15,9 +15,24 @@ pub struct FieldBlock {
   visible: bool,
 }
 
+#[derive(Clone, Copy)]
+struct FieldStatus {
+  exist: bool,
+  color: Color,
+}
+
+impl Default for FieldStatus {
+  fn default() -> Self {
+    FieldStatus {
+      exist: false,
+      color: Color::hex("282c34").unwrap(),
+    }
+  }
+}
+
 #[derive(Resource, Default, Clone, Copy)]
 pub struct Field {
-  blocks: [[bool; FIELD_ROW as usize]; FIELD_COLUMN as usize],
+  blocks: [[FieldStatus; FIELD_COLUMN as usize]; FIELD_ROW as usize],
 }
 
 impl Field {
@@ -28,7 +43,7 @@ impl Field {
     if pos.y >= FIELD_ROW {
       return false;
     }
-    if self.blocks[pos.x as usize][pos.y as usize] {
+    if self.blocks[pos.y as usize][pos.x as usize].exist {
       return false;
     }
     true
@@ -40,7 +55,7 @@ impl Field {
     pos: IVec2,
     color: Color,
   ) -> bool {
-    self.blocks[pos.x as usize][pos.y as usize] = true;
+    self.blocks[pos.y as usize][pos.x as usize] = FieldStatus { exist: true, color };
     for (mut sprite, field_block) in query {
       if field_block.pos != pos {
         continue;
@@ -59,7 +74,11 @@ impl Field {
   }
 
   pub fn unset_block(&mut self, query: &mut Query<(&mut Sprite, &mut FieldBlock)>, pos: IVec2) {
-    self.blocks[pos.x as usize][pos.y as usize] = false;
+    let color = Color::hex("282c34").unwrap();
+    self.blocks[pos.y as usize][pos.x as usize] = FieldStatus {
+      exist: false,
+      color,
+    };
     for (mut sprite, field_block) in query {
       if field_block.pos != pos {
         continue;
@@ -67,9 +86,40 @@ impl Field {
       if !field_block.visible {
         break;
       }
-      sprite.color = Color::hex("282c34").unwrap();
+      sprite.color = color;
       break;
     }
+  }
+
+  fn reflesh(&mut self, query: &mut Query<(&mut Sprite, &mut FieldBlock)>) {
+    for (mut sprite, field_block) in query {
+      if field_block.visible {
+        sprite.color = self.blocks[field_block.pos.y as usize][field_block.pos.x as usize].color;
+      }
+    }
+  }
+
+  pub fn delete_filled_line(&mut self, query: &mut Query<(&mut Sprite, &mut FieldBlock)>) {
+    let mut filled_line: Vec<usize> = Vec::new();
+    for (i, e) in self.blocks.iter().enumerate() {
+      if let None = e.iter().filter(|a| !a.exist).next() {
+        filled_line.push(i);
+      }
+    }
+    if filled_line.is_empty() {
+      return;
+    }
+
+    let mut insert_dst = self.blocks.len() - 1;
+    for i in (0..self.blocks.len() - 1).rev() {
+      if filled_line.contains(&i) {
+        continue;
+      }
+      self.blocks[insert_dst] = self.blocks[i];
+      insert_dst -= 1;
+    }
+
+    self.reflesh(query);
   }
 }
 
