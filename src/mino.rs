@@ -2,7 +2,7 @@ use std::time::Duration;
 
 use bevy::prelude::*;
 
-use crate::{field, mino_type, next};
+use crate::{field, input, mino_type, next};
 #[derive(Component, Default)]
 pub struct Mino {
   pos:       IVec2,
@@ -120,21 +120,6 @@ impl Mino {
 #[derive(Resource, Default)]
 pub struct MinoDropTimer(pub Timer);
 
-#[derive(Resource, Default)]
-pub struct KeyRepeat {
-  duration:     Duration,
-  repeat_timer: Timer,
-  previous:     Option<KeyCode>,
-}
-impl KeyRepeat {
-  fn new(repeat_timer: Timer) -> Self {
-    KeyRepeat {
-      repeat_timer,
-      ..default()
-    }
-  }
-}
-
 pub fn init(app: &mut App) {
   app.add_system(drop_mino);
   app.add_system(move_mino);
@@ -143,10 +128,6 @@ pub fn init(app: &mut App) {
   let mut drop_timer = Timer::new(Duration::from_millis(300), TimerMode::Repeating);
   drop_timer.pause();
   app.insert_resource(MinoDropTimer(drop_timer));
-
-  let mut repeat_timer = Timer::new(Duration::from_millis(50), TimerMode::Repeating);
-  repeat_timer.pause();
-  app.insert_resource(KeyRepeat::new(repeat_timer));
 }
 
 fn drop_mino(
@@ -171,8 +152,7 @@ fn drop_mino(
 
 fn move_mino(
   key_input: Res<Input<KeyCode>>,
-  mut keyrepeat: ResMut<KeyRepeat>,
-  time: Res<Time>,
+  keyrepeat: Res<input::KeyRepeat>,
   next_mino: ResMut<next::NextMino>,
   mut query: Query<&mut Mino>,
   mut field: ResMut<field::Field>,
@@ -181,46 +161,10 @@ fn move_mino(
 ) {
   let Ok(mut mino) = query.get_single_mut() else {return;};
 
-  let iter = [
-    (KeyCode::Left, IVec2::new(-1, 0)),
-    (KeyCode::Right, IVec2::new(1, 0)),
-  ];
-
-  let mut pressed = false;
-  for e in iter {
-    if key_input.pressed(e.0) {
-      pressed = true;
-      match keyrepeat.previous {
-        Some(code) => {
-          if code == e.0 {
-            keyrepeat.duration += time.delta();
-            if keyrepeat.duration > Duration::from_millis(150) {
-              if keyrepeat.repeat_timer.paused() {
-                keyrepeat.repeat_timer.reset();
-                keyrepeat.repeat_timer.unpause();
-              }
-              keyrepeat.repeat_timer.tick(time.delta());
-            }
-          } else {
-            keyrepeat.repeat_timer.pause();
-            keyrepeat.duration = time.delta();
-          }
-        }
-        None => keyrepeat.duration = time.delta(),
-      }
-      keyrepeat.previous = Some(e.0);
-      if keyrepeat.duration == time.delta() ||
-        (keyrepeat.duration > Duration::from_millis(200) && keyrepeat.repeat_timer.finished())
-      {
-        let _ = mino.move_mino(e.1, &mut field, &mut field_block_query);
-        break;
-      }
-    }
-  }
-
-  if !pressed {
-    keyrepeat.repeat_timer.pause();
-    keyrepeat.previous = None;
+  if keyrepeat.left_move {
+    let _ = mino.move_mino(IVec2::new(-1, 0), &mut field, &mut field_block_query);
+  } else if keyrepeat.right_move {
+    let _ = mino.move_mino(IVec2::new(1, 0), &mut field, &mut field_block_query);
   }
 
   if key_input.just_pressed(KeyCode::Up) {

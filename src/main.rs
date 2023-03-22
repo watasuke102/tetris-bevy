@@ -2,6 +2,7 @@ use bevy::prelude::*;
 
 mod entry;
 mod field;
+mod input;
 mod mino;
 mod mino_type;
 mod next;
@@ -21,6 +22,7 @@ fn main() {
       ..default()
     }))
     .add_startup_system(setup);
+  input::init(&mut app);
   next::init(&mut app);
   entry::init(&mut app);
   field::init(&mut app);
