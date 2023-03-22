@@ -135,18 +135,30 @@ fn drop_mino(
   next_mino: ResMut<next::NextMino>,
   mut field: ResMut<field::Field>,
   mut field_block_query: Query<(&mut Sprite, &mut field::FieldBlock)>,
-  mut timer: ResMut<MinoDropTimer>,
+  soft_drop_timer: Res<input::SoftDropTimer>,
+  mut hard_drop_timer: ResMut<MinoDropTimer>,
   time: Res<Time>,
 ) {
-  timer.0.tick(time.delta());
-  if !timer.0.finished() {
+  hard_drop_timer.0.tick(time.delta());
+  if !hard_drop_timer.0.finished() && !soft_drop_timer.0.finished() {
     return;
   }
 
   let Ok(mut mino) = query.get_single_mut() else {return;};
-  if let Err(_) = mino.move_mino(IVec2::new(0, 1), &mut field, &mut field_block_query) {
+  let res = mino.move_mino(IVec2::new(0, 1), &mut field, &mut field_block_query);
+
+  if !hard_drop_timer.0.finished() {
+    return;
+  }
+
+  if let Err(_) = res {
     field.delete_filled_line(&mut field_block_query);
-    mino.set_type(next_mino, field, &mut field_block_query, &mut timer);
+    mino.set_type(
+      next_mino,
+      field,
+      &mut field_block_query,
+      &mut hard_drop_timer,
+    );
   }
 }
 

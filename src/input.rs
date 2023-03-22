@@ -10,6 +10,9 @@ pub struct KeyRepeat {
   pub right_move: bool,
 }
 
+#[derive(Resource, Default)]
+pub struct SoftDropTimer(pub Timer);
+
 impl KeyRepeat {
   fn new(repeat_timer: Timer) -> Self {
     KeyRepeat {
@@ -21,6 +24,11 @@ impl KeyRepeat {
 
 pub fn init(app: &mut App) {
   app.add_system(move_horizontal_dir);
+  app.add_system(soft_drop);
+
+  let mut drop_timer = Timer::new(Duration::from_millis(50), TimerMode::Repeating);
+  drop_timer.pause();
+  app.insert_resource(SoftDropTimer(drop_timer));
 
   let mut repeat_timer = Timer::new(Duration::from_millis(50), TimerMode::Repeating);
   repeat_timer.pause();
@@ -79,4 +87,20 @@ fn move_horizontal_dir(
     keyrepeat.repeat_timer.pause();
     keyrepeat.previous = None;
   }
+}
+
+fn soft_drop(
+  key_input: Res<Input<KeyCode>>,
+  time: Res<Time>,
+  mut drop_timer: ResMut<SoftDropTimer>,
+) {
+  if !key_input.pressed(KeyCode::Down) {
+    drop_timer.0.pause();
+    return;
+  }
+  if drop_timer.0.paused() {
+    drop_timer.0.reset();
+    drop_timer.0.unpause();
+  }
+  drop_timer.0.tick(time.delta());
 }
